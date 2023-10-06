@@ -1,0 +1,2 @@
+# NLP-trading
+2023-2025 CS NEA
