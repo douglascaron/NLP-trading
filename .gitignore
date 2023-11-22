@@ -19,6 +19,7 @@
 *_LOCAL_*.txt
 *_REMOTE_*.txt
 *.txt
+*.csv
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
