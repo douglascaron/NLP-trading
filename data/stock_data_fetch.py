@@ -37,7 +37,7 @@ if __name__ == "__main__":
     start_date = datetime.now() - timedelta(days=60)
     end_date = datetime.now()
     interval = "5m"
-    file_name = f"{symbol}_{interval}.csv"
+    file_name = f"stock_data_{symbol}_{interval}.csv"
     
     try:
         stock_data = get_stock_data(symbol, start_date, end_date, interval)

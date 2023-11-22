@@ -19,7 +19,9 @@
 *_LOCAL_*.txt
 *_REMOTE_*.txt
 *.txt
-*.csv
+nsadaq_data.csv
+backtest_log.csv
+stock_data_*_*.csv
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
