@@ -12,8 +12,8 @@ init(autoreset=True)
 
 
 def get_news():
-    nasdaq_data = pd.read_csv('30_data.csv')
-    tickers = nasdaq_data['Symbol']
+    top30 = pd.read_csv('30_data.csv')
+    tickers = top30['Symbol']
 
     average_sentiments = {}  # To store average sentiment for each stock
 

@@ -21,17 +21,17 @@ def save_to_csv(data, file_name):
         print(f"Error saving data to {file_name}: {e}")
 
 if __name__ == "__main__":
-    nasdaq_data_file = "nasdaq_data.csv"
+    top_30_data = "30_data.csv"
     
     try:
-        nasdaq_data = pd.read_csv(nasdaq_data_file)
+        top30 = pd.read_csv(top_30_data)
     except FileNotFoundError:
-        print(f"Error: {nasdaq_data_file} not found.")
+        print(f"Error: {top_30_data} not found.")
         exit(1)
 
     symbol = input("Enter stock symbol: ").upper()  # Convert input to uppercase for case-insensitive comparison
-    if symbol not in nasdaq_data['Symbol'].values:
-        print(f"Error: {symbol} not found in {nasdaq_data_file}. Please enter a valid symbol.")
+    if symbol not in top30['Symbol'].values:
+        print(f"Error: {symbol} not found in {top_30_data}. Please enter a valid symbol.")
         exit(1)
 
     start_date = datetime.now() - timedelta(days=60)
