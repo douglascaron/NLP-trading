@@ -3,7 +3,6 @@ from newspaper import Article
 from colorama import init, Fore
 import yfinance as yf
 import pandas as pd
-from proxy import check_proxy
 import nltk
 
 nltk.download('vader_lexicon')
@@ -24,8 +23,6 @@ def get_news():
 
         try:
             stock = yf.Ticker(stock_ticker)
-
-            proxy = check_proxy()
             
             stock_news = stock.news
 
