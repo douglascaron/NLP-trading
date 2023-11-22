@@ -12,7 +12,7 @@ init(autoreset=True)
 
 
 def get_news():
-    top30 = pd.read_csv('30_data.csv')
+    top30 = pd.read_csv('data/30_data.csv')
     tickers = top30['Symbol']
 
     average_sentiments = {}  # To store average sentiment for each stock
