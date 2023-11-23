@@ -1,55 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Chart</title>
-    <!-- Load Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="assets/base.min.js"></script>
+  <script src="assets/ui.min.js"></script>
+  <script src="assets/exports.min.js"></script>
+  <script src="assets/stock.min.js"></script>
+  <script src="assets/data-adapter.min.js"></script>
+  <link href="assets/ui.min.css" type="text/css" rel="stylesheet">
+  <link href="assets/font.min.css" type="text/css" rel="stylesheet">
+  <style type="text/css">
+
+    html,
+    body,
+    #container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  
+</style>
 </head>
 <body>
-    <!-- Canvas to draw the chart -->
-    <canvas id="stockChart" width="800" height="400"></canvas>
+  
+  <div id="container"></div>
+  
 
-    <!-- PHP code to get the data from the CSV file -->
-    <?php
-        $csvFile = 'market_data.csv';
-        $data = array_map('str_getcsv', file($csvFile));
-        $header = array_shift($data); // Remove header row
+  <script>
 
-        $dates = [];
-        $closePrices = [];
+    anychart.onDocumentReady(function () {
+      anychart.data.loadCsvFile(
+        'market_data.csv',
+        function (data) {
+          var dataTable = anychart.data.table();
+          dataTable.addData(data);
 
-        foreach ($data as $row) {
-            $dates[] = $row[0]; // Assuming the first column is the date
-            $closePrices[] = $row[3]; // Assuming the fourth column is the closing price
+          var mapping = dataTable.mapAs({
+            open: 1,
+            high: 2,
+            low: 3,
+            close: 4
+          });
+
+          // map loaded data for the scroller
+          var scrollerMapping = dataTable.mapAs();
+          scrollerMapping.addField('value', 5);
+
+          // create stock chart
+          var chart = anychart.stock();
+
+          // create first plot on the chart
+          var plot = chart.plot(0);
+          // set grid settings
+          plot.yGrid(true).xGrid(true).yMinorGrid(true).xMinorGrid(true);
+
+          // create EMA indicators with period 50
+          plot
+            .ema(dataTable.mapAs({ value: 4 }))
+            .series()
+            .stroke('1.5 #455a64');
+
+          // create ohlc series
+          plot
+            .ohlc()
+            .data(mapping)
+            .name('Market Data')
+            .legendItem({ iconType: 'rising-falling' });
+
+          // create scroller series with mapped data
+          chart.scroller().ohlc(mapping);
+
+          // set container id for the chart
+          chart.container('container');
+          // initiate chart drawing
+          chart.draw();
+
+          // create range picker
+          var rangePicker = anychart.ui.rangePicker();
+          // init range picker
+          rangePicker.render(chart);
+
+          // create range selector
+          var rangeSelector = anychart.ui.rangeSelector();
+          // init range selector
+          rangeSelector.render(chart);
         }
-    ?>
-
-    <!-- JavaScript code to create the chart -->
-    <script>
-        var ctx = document.getElementById('stockChart').getContext('2d');
-        var stockChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?php echo json_encode($dates); ?>,
-                datasets: [{
-                    label: 'Closing Prices',
-                    data: <?php echo json_encode($closePrices); ?>,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    </script>
+      );
+    });
+  
+</script>
 </body>
 </html>

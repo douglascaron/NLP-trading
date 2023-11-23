@@ -15,7 +15,7 @@ def get_stock_data(symbol, start_date, end_date, interval):
 
 def save_to_csv(data, file_name):
     try:
-        data.to_csv(file_name, index=False)
+        data.to_csv(file_name, index=True)
         print(f"Data saved to {file_name}")
     except Exception as e:
         print(f"Error saving data to {file_name}: {e}")
@@ -34,9 +34,9 @@ if __name__ == "__main__":
         print(f"Error: {symbol} not found in {top_30_data}. Please enter a valid symbol.")
         exit(1)
 
-    start_date = datetime.now() - timedelta(days=60)
+    start_date = datetime.now() - timedelta(days=365)
     end_date = datetime.now()
-    interval = "5m"
+    interval = "1h"
     file_name = f"stock_data_{symbol}_{interval}.csv"
     
     try:
