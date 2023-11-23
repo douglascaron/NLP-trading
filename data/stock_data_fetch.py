@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     start_date = datetime.now() - timedelta(days=365)
     end_date = datetime.now()
-    interval = "1h"
+    interval = input("Interval: ")
     file_name = f"stock_data_{symbol}_{interval}.csv"
     
     try:
