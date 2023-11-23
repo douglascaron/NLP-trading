@@ -28,15 +28,10 @@
                             rowData[header[j]] = values[j];
                         }
 
-                        // Log rowData to see what's being parsed
-                        console.log('Row Data:', rowData);
-
                         // Check if Datetime exists in rowData
                         if (rowData['Datetime']) {
                             // Parse datetime and adjust for time zone offset
                             const datetimeString = rowData['Datetime'];
-                            console.log('Datetime String:', datetimeString);
-
                             const dateComponents = datetimeString.split(' ');
                             const dateString = dateComponents[0];
                             const timeString = dateComponents[1].split('-')[0];
@@ -46,14 +41,8 @@
 
                             seriesData.push({
                                 time: adjustedDateTime.getTime() / 1000,
-                                open: parseFloat(rowData['Open']),
-                                high: parseFloat(rowData['High']),
-                                low: parseFloat(rowData['Low']),
-                                close: parseFloat(rowData['Close']),
-                                volume: parseFloat(rowData['Volume'])
+                                value: parseFloat(rowData['Close']), // Use 'Close' as the value for the line chart
                             });
-                        } else {
-                            console.log('Datetime is undefined in the row data. Skipping this row.');
                         }
                     }
 
@@ -62,14 +51,14 @@
                         width: window.innerWidth,
                         height: 500,
                         layout: {
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: '#0a0b1e',
                         },
                         grid: {
                             vertLines: {
-                                color: 'rgba(197, 203, 206, 0.5)',
+                                visible: false,
                             },
                             horzLines: {
-                                color: 'rgba(197, 203, 206, 0.5)',
+                                visible: false,
                             },
                         },
                         crosshair: {
@@ -79,13 +68,30 @@
                             timeVisible: true,
                             secondsVisible: false,
                         },
+                        priceScale: {
+                            mode: LightweightCharts.PriceScaleMode.Normal,
+                            borderColor: '#2962ff',
+                        },
                     });
 
-                    // Add a candlestick series
-                    const candlestickSeries = chart.addCandlestickSeries();
+                    // Add a line series
+                    const lineSeries = chart.addLineSeries({
+                        color: '#2962ff',
+                        lineWidth: 2,
+                        base: 0,
+                    });
 
                     // Add the parsed market data to the chart
-                    candlestickSeries.setData(seriesData);
+                    lineSeries.setData(seriesData);
+
+                    // Add a color gradient below the line
+                    const areaSeries = chart.addAreaSeries({
+                        topColor: 'rgba(41, 98, 255, 0)', // 0% opacity at the top
+                        bottomColor: 'rgba(41, 98, 255, 1)', // 100% opacity at the line
+                        lineColor: '#2962ff',
+                        lineWidth: 2,
+                    });
+                    areaSeries.setData(seriesData);
                 })
                 .catch(error => console.error('Error fetching market data:', error));
         });
