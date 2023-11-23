@@ -1,92 +1,94 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <script src="assets/base.min.js"></script>
-  <script src="assets/ui.min.js"></script>
-  <script src="assets/exports.min.js"></script>
-  <script src="assets/stock.min.js"></script>
-  <script src="assets/data-adapter.min.js"></script>
-  <link href="assets/ui.min.css" type="text/css" rel="stylesheet">
-  <link href="assets/font.min.css" type="text/css" rel="stylesheet">
-  <style type="text/css">
-
-    html,
-    body,
-    #container {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-  
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data Chart</title>
+    <script type="text/javascript" src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
-  
-  <div id="container"></div>
-  
+    <div id="chart-container" style="width: 100%; height: 500px;"></div>
 
-  <script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load market data from CSV
+            fetch('market_data.csv')
+                .then(response => response.text())
+                .then(data => {
+                    // Parse CSV data
+                    const rows = data.split('\n');
+                    const header = rows[0].split(',');
+                    const seriesData = [];
 
-    anychart.onDocumentReady(function () {
-      anychart.data.loadCsvFile(
-        'market_data.csv',
-        function (data) {
-          var dataTable = anychart.data.table();
-          dataTable.addData(data);
+                    for (let i = 1; i < rows.length; i++) {
+                        const values = rows[i].split(',');
+                        const rowData = {};
 
-          var mapping = dataTable.mapAs({
-            open: 1,
-            high: 2,
-            low: 3,
-            close: 4
-          });
+                        for (let j = 0; j < header.length; j++) {
+                            rowData[header[j]] = values[j];
+                        }
 
-          // map loaded data for the scroller
-          var scrollerMapping = dataTable.mapAs();
-          scrollerMapping.addField('value', 5);
+                        // Log rowData to see what's being parsed
+                        console.log('Row Data:', rowData);
 
-          // create stock chart
-          var chart = anychart.stock();
+                        // Check if Datetime exists in rowData
+                        if (rowData['Datetime']) {
+                            // Parse datetime and adjust for time zone offset
+                            const datetimeString = rowData['Datetime'];
+                            console.log('Datetime String:', datetimeString);
 
-          // create first plot on the chart
-          var plot = chart.plot(0);
-          // set grid settings
-          plot.yGrid(true).xGrid(true).yMinorGrid(true).xMinorGrid(true);
+                            const dateComponents = datetimeString.split(' ');
+                            const dateString = dateComponents[0];
+                            const timeString = dateComponents[1].split('-')[0];
+                            const dateTime = new Date(`${dateString}T${timeString}`);
+                            const offsetMinutes = parseInt(dateComponents[1].split('-')[1]) || 0;
+                            const adjustedDateTime = new Date(dateTime.getTime() - offsetMinutes * 60000);
 
-          // create EMA indicators with period 50
-          plot
-            .ema(dataTable.mapAs({ value: 4 }))
-            .series()
-            .stroke('1.5 #455a64');
+                            seriesData.push({
+                                time: adjustedDateTime.getTime() / 1000,
+                                open: parseFloat(rowData['Open']),
+                                high: parseFloat(rowData['High']),
+                                low: parseFloat(rowData['Low']),
+                                close: parseFloat(rowData['Close']),
+                                volume: parseFloat(rowData['Volume'])
+                            });
+                        } else {
+                            console.log('Datetime is undefined in the row data. Skipping this row.');
+                        }
+                    }
 
-          // create ohlc series
-          plot
-            .ohlc()
-            .data(mapping)
-            .name('Market Data')
-            .legendItem({ iconType: 'rising-falling' });
+                    // Create a chart with custom options
+                    const chart = LightweightCharts.createChart(document.getElementById('chart-container'), {
+                        width: window.innerWidth,
+                        height: 500,
+                        layout: {
+                            backgroundColor: '#f5f5f5',
+                        },
+                        grid: {
+                            vertLines: {
+                                color: 'rgba(197, 203, 206, 0.5)',
+                            },
+                            horzLines: {
+                                color: 'rgba(197, 203, 206, 0.5)',
+                            },
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                        },
+                        timeScale: {
+                            timeVisible: true,
+                            secondsVisible: false,
+                        },
+                    });
 
-          // create scroller series with mapped data
-          chart.scroller().ohlc(mapping);
+                    // Add a candlestick series
+                    const candlestickSeries = chart.addCandlestickSeries();
 
-          // set container id for the chart
-          chart.container('container');
-          // initiate chart drawing
-          chart.draw();
-
-          // create range picker
-          var rangePicker = anychart.ui.rangePicker();
-          // init range picker
-          rangePicker.render(chart);
-
-          // create range selector
-          var rangeSelector = anychart.ui.rangeSelector();
-          // init range selector
-          rangeSelector.render(chart);
-        }
-      );
-    });
-  
-</script>
+                    // Add the parsed market data to the chart
+                    candlestickSeries.setData(seriesData);
+                })
+                .catch(error => console.error('Error fetching market data:', error));
+        });
+    </script>
 </body>
 </html>
