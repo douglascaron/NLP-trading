@@ -2,25 +2,39 @@ from newspaper import Article
 from colorama import init, Fore
 import yfinance as yf
 import pandas as pd
-import torch
+import numpy as np
 from transformers import BertTokenizer, BertForSequenceClassification
+import os
+
 finbert = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone',num_labels=3)
 tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
-
-
+labels = {0:f'{Fore.CYAN}[Sentiment] {Fore.YELLOW}Neutral', 1:f'{Fore.CYAN}[Sentiment] {Fore.GREEN}Positive',2:f'{Fore.CYAN}[Sentiment] {Fore.RED}Negative'}
 init(autoreset=True)
 
+if os.path.exists("sentiment.txt"):
+    os.remove("sentiment.txt")
+
 def analyze_sentiment(data):
-    analysis = finbert(**(tokenizer(data, return_tensors="pt", padding=True)))[0]
-    sentiment_scores = analysis
-    sentiment_score = torch.mean(sentiment_scores).item()    
+    inputs = tokenizer(data, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    # Ensure the input tensors have the correct size
+    for key in inputs:
+        inputs[key] = inputs[key][:, :512]  # Truncate if necessary
+    analysis = finbert(**inputs)[0]
+    
+    # Assuming FinBERT outputs a tensor with sentiment scores
+    sentiment_score = analysis.detach().numpy()
+
+    print(analysis)
+    print(f'Sentiment Score: {sentiment_score}')
+
     return sentiment_score
+
 
 def get_news():
     top30 = pd.read_csv('data/30_data.csv')
     tickers = top30['Symbol']
 
-    average_sentiments = {}  # To store average sentiment for each stock
+    average_sentiments = {}
 
     for stock_ticker in tickers:
         print(f'{Fore.CYAN}[Stock] {Fore.GREEN}{stock_ticker} selected{Fore.RESET}')
@@ -62,7 +76,6 @@ def get_news():
         except ValueError:
             print(f'{Fore.CYAN}[{stock_ticker}] {Fore.RED}Error fetching stock. Rate limit reached.{Fore.RESET}')
 
-    # Write average sentiments to 'sentiment.txt'
     with open('sentiment.txt', 'a') as f:
         for stock_ticker, average_sentiment in average_sentiments.items():
             if average_sentiment >= 0.5:
@@ -83,15 +96,6 @@ def analyse_headlines(headline_content, headline_url, headline_ticker):
     date = (article.publish_date)
 
     article_score = analyze_sentiment(article.text)
-
-    if sentiment_score >= 0.05:
-        print(f'{Fore.CYAN}[Sentiment] {Fore.GREEN}Positive')
-    elif sentiment_score <= -0.05:
-        print(f'{Fore.CYAN}[Sentiment] {Fore.RED}Negative')
-    else:
-        print(f'{Fore.CYAN}[Sentiment] {Fore.YELLOW}Neutral for Headline ({headline_content})')
-        print(f'{Fore.RED}[=================================================================]')
-        return 0  # Return 0 for neutral sentiment
 
     print(f'{Fore.YELLOW}[Analysis for Headline]')
     print(f'{Fore.YELLOW}[Headline]{Fore.RESET} {headline_content}')
