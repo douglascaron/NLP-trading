@@ -1,15 +1,20 @@
-from nltk.sentiment import SentimentIntensityAnalyzer
 from newspaper import Article
 from colorama import init, Fore
 import yfinance as yf
 import pandas as pd
-import nltk
+import torch
+from transformers import BertTokenizer, BertForSequenceClassification
+finbert = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone',num_labels=3)
+tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
 
-nltk.download('vader_lexicon')
-nltk.download('punkt')
 
 init(autoreset=True)
 
+def analyze_sentiment(data):
+    analysis = finbert(**(tokenizer(data, return_tensors="pt", padding=True)))[0]
+    sentiment_scores = analysis
+    sentiment_score = torch.mean(sentiment_scores).item()    
+    return sentiment_score
 
 def get_news():
     top30 = pd.read_csv('data/30_data.csv')
@@ -68,20 +73,16 @@ def get_news():
                 f.write(f"[{stock_ticker}] Neutral Stock [{average_sentiment:.4f}]\n")
 
 
-def analyse_headlines(headline_content, headline_url, headline_ticker, sensitivity=1.0):
-    sia = SentimentIntensityAnalyzer()
-
-    sentiment_score = sia.polarity_scores(headline_content)['compound']
-    sentiment_score *= sensitivity
+def analyse_headlines(headline_content, headline_url, headline_ticker):
+    sentiment_score = analyze_sentiment(headline_content)
 
     article = Article(headline_url)
     article.download()
     article.parse()
     article.nlp()
     date = (article.publish_date)
-    keywords = (article.keywords)
 
-    article_score = sia.polarity_scores(article.text)['compound']
+    article_score = analyze_sentiment(article.text)
 
     if sentiment_score >= 0.05:
         print(f'{Fore.CYAN}[Sentiment] {Fore.GREEN}Positive')
@@ -101,7 +102,6 @@ def analyse_headlines(headline_content, headline_url, headline_ticker, sensitivi
     print('----------')
 
     print(f'{Fore.CYAN}[Analysis for Article]')
-    print(f'{Fore.CYAN}[Keywords]{Fore.RESET} {keywords}')
     print(f'{Fore.CYAN}[Ticker]{Fore.RESET} {headline_ticker}')
     print(f'{Fore.CYAN}[Date Published]{Fore.RESET} {date}')
     print(f'{Fore.CYAN}[Sentiment Score]{Fore.RESET} {article_score:.4f}')
