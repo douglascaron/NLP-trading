@@ -1,7 +1,11 @@
 # NLP-trading
 2023-2025 CS NEA
 
-This project is a CS A-level NEA which uses AI to trade stocks.
+This project is a CS A-level NEA which uses FinBERT AI model to trade based on fyinance news
+
+Technologies: 
+- https://pypi.org/project/yfinance/
+- https://huggingface.co/ProsusAI/finbert
 
 Possible frontend inspirations: 
 - https://ailabtelkom.github.io/ (https://github.com/ailabtelkom/ailabtelkom.github.io)
