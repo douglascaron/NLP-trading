@@ -41,10 +41,4 @@ for item in news:
     print(f"Published: {item['published']}")
     sentiment = analyze_sentiment(item['title'])
     print(sentiment)
-    # if sentiment > 0:
-    #     print(f"[{symbol}] Positive [{sentiment:.4f}]\n")
-    # elif sentiment < -0:
-    #     print(f"[{symbol}] Negative [{sentiment:.4f}]\n")
-    # else:
-    #     print(f"[{symbol}] Neutral [{sentiment:.4f}]\n")
     print("\n")
