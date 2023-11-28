@@ -1,8 +1,22 @@
-import feedparser,nltk
-from nltk.sentiment import SentimentIntensityAnalyzer
-nltk.download('vader_lexicon')
-sia = SentimentIntensityAnalyzer()
+import feedparser
+from transformers import BertTokenizer, BertForSequenceClassification
+import numpy as np
 
+
+finbert = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone',num_labels=3)
+tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
+labels = {0:f'[Sentiment] Neutral', 1:f'[Sentiment] Positive',2:f'[Sentiment] Negative'}
+
+def analyze_sentiment(data):
+    inputs = tokenizer(data, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    # Ensure the input tensors have the correct size
+    for key in inputs:
+        inputs[key] = inputs[key][:, :512]  # Truncate if necessary
+    analysis = finbert(**inputs)[0]
+    for idx, sent in enumerate(analysis):
+        # print(sent, '----', labels[np.argmax(analysis.detach().numpy()[idx])])
+        sentiment = labels[np.argmax(analysis.detach().numpy()[idx])]
+    return sentiment
 
 def api_news(symbol):
     RSS_URL = 'http://finance.yahoo.com/rss/headline?s='
@@ -19,17 +33,18 @@ def api_news(symbol):
 
     return news
 
-symbol = 'AMAT'
+symbol = 'AAPL'
 news = api_news(symbol)
 for item in news:
     print(f"Title: {item['title']}")
     print(f"Link: {item['link']}")
     print(f"Published: {item['published']}")
-    sentiment = (SentimentIntensityAnalyzer().polarity_scores(item['title'])['compound'])
-    if sentiment > 0:
-        print(f"[{symbol}] Positive [{sentiment:.4f}]\n")
-    elif sentiment < -0:
-        print(f"[{symbol}] Negative [{sentiment:.4f}]\n")
-    else:
-        print(f"[{symbol}] Neutral [{sentiment:.4f}]\n")
+    sentiment = analyze_sentiment(item['title'])
+    print(sentiment)
+    # if sentiment > 0:
+    #     print(f"[{symbol}] Positive [{sentiment:.4f}]\n")
+    # elif sentiment < -0:
+    #     print(f"[{symbol}] Negative [{sentiment:.4f}]\n")
+    # else:
+    #     print(f"[{symbol}] Neutral [{sentiment:.4f}]\n")
     print("\n")
