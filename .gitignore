@@ -18,7 +18,6 @@
 *_BASE_*.txt
 *_LOCAL_*.txt
 *_REMOTE_*.txt
-*.txt
 backtest_log.csv
 stock_data_*_*.csv
 

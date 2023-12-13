@@ -1,0 +1,7 @@
+newspaper3k
+colorama
+yfinance
+pandas
+numpy
+transformers
+os
