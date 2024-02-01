@@ -4,7 +4,7 @@ from colorama import init, Fore
 import yfinance as yf
 import pandas as pd
 import nltk
-
+# TO IMPLEMENT: CHECK TICKER --> CHECK MARKET CAP / MAKE SURE NOT TOO POPULAR --> INVEST?
 nltk.download('vader_lexicon')
 nltk.download('punkt')
 

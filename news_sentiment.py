@@ -5,6 +5,14 @@ import pandas as pd
 import numpy as np
 from transformers import BertTokenizer, BertForSequenceClassification
 import os
+# Modules to install: 
+# torch (not sure - requires research - sometimes)
+# newspaper3k
+# colorama
+# yfinance
+# pandas
+# numpy
+# transformers
 
 finbert = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone',num_labels=3)
 tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
