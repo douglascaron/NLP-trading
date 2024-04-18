@@ -11,26 +11,13 @@ Not much coding was actually done, except for the setting up of the terminal whe
 
 
 ======================
-Entry Date: 14/03/2024
-Summary of Progress:
-I'm not starting research on how 
+Entry Date: 16/03/2024
+Summary of Progress
+Creating a flowchart demonstrating how the program should work and I will then document each step and requirements for each step.
+
 
 Coding and Testing:
 
-
-Testing Results:
-
-Stakeholder Discussion/Feedback:
-
-Evidence of Progression:
-
-New Ideas and Direction Based on Testing and Feedback:
-
-Challenges Encountered:
-
-Challenges Overcome:
-
-Reflections and Learnings:
 
 ======================
 Entry Date: //2024
